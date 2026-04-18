@@ -1,0 +1,98 @@
+# .github/workflows/ci.yml
+name: Laravel CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: laravel_test
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_USER: laravel
+          MYSQL_PASSWORD: secret
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo, pdo_mysql, xml, bcmath
+          coverage: xdebug
+
+      - name: Cache Composer packages
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('composer.lock') }}
+          restore-keys: ${{ runner.os }}-php-
+
+      - name: Cache Node modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Prepare .env.testing
+        run: |
+          cp .env.example .env.testing
+          echo "APP_ENV=testing"        >> .env.testing
+          echo "DB_CONNECTION=mysql"    >> .env.testing
+          echo "DB_HOST=127.0.0.1"      >> .env.testing
+          echo "DB_PORT=3306"           >> .env.testing
+          echo "DB_DATABASE=laravel_test" >> .env.testing
+          echo "DB_USERNAME=laravel"    >> .env.testing
+          echo "DB_PASSWORD=secret"     >> .env.testing
+          echo "CACHE_STORE=array"      >> .env.testing
+          echo "SESSION_DRIVER=array"   >> .env.testing
+          echo "QUEUE_CONNECTION=sync"  >> .env.testing
+
+      - name: Generate app key
+        run: php artisan key:generate --env=testing
+
+      - name: Run migrations
+        run: php artisan migrate --force --env=testing
+
+      - name: Check code style
+        run: ./vendor/bin/pint --test
+
+      - name: Run static analysis
+        run: ./vendor/bin/phpstan analyse --memory-limit=512M
+
+      - name: Run tests
+        run: php artisan test --coverage --min=80
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: laravel_test
+          DB_USERNAME: laravel
+          DB_PASSWORD: secret
