@@ -6,3 +6,6 @@ parameters:
         - app
 
     level: 5
+
+        ignoreErrors:
+            - '#Relation .* is not found in#'
