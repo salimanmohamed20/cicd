@@ -96,45 +96,166 @@ jobs:
           DB_USERNAME: laravel
           DB_PASSWORD: secret
 
-      # ─── Slack Notifications ─────────────────────────
-      - name: Notify Slack - Success
-        if: success()
-        uses: slackapi/slack-github-action@v1.27.0
-        with:
-          payload: |
-            {
-              "text": "✅ *Pipeline نجح!*",
-              "attachments": [{
-                "color": "good",
-                "fields": [
-                  {"title": "Repo",   "value": "${{ github.repository }}", "short": true},
-                  {"title": "Branch", "value": "${{ github.ref_name }}",   "short": true},
-                  {"title": "By",     "value": "${{ github.actor }}",      "short": true},
-                  {"title": "Link",   "value": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}", "short": false}
-                ]
-              }]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+            # ─── Slack Notifications ─────────────────────────
+                         - name: Notify Slack - Success
+                         if: success()
+                         uses: slackapi/slack-github-action@v1.27.0
+                         with:
+                           payload: |
+                             {
+                               "attachments": [
+                                 {
+                                   "color": "#36a64f",
+                                   "blocks": [
+                                     {
+                                       "type": "header",
+                                       "text": {
+                                         "type": "plain_text",
+                                         "text": "✅ الـ Pipeline نجح بنجاح!"
+                                       }
+                                     },
+                                     {
+                                       "type": "section",
+                                       "fields": [
+                                         {
+                                           "type": "mrkdwn",
+                                           "text": "*📦 المشروع:*\n${{ github.repository }}"
+                                         },
+                                         {
+                                           "type": "mrkdwn",
+                                           "text": "*🌿 الـ Branch:*\n${{ github.ref_name }}"
+                                         },
+                                         {
+                                           "type": "mrkdwn",
+                                           "text": "*👤 المطور:*\n${{ github.actor }}"
+                                         },
+                                         {
+                                           "type": "mrkdwn",
+                                           "text": "*🔖 الـ Commit:*\n`${{ github.sha }}`"
+                                         }
+                                       ]
+                                     },
+                                     {
+                                       "type": "section",
+                                       "text": {
+                                         "type": "mrkdwn",
+                                         "text": "*📝 رسالة الـ Commit:*\n${{ github.event.head_commit.message }}"
+                                       }
+                                     },
+                                     {
+                                       "type": "actions",
+                                       "elements": [
+                                         {
+                                           "type": "button",
+                                           "text": {
+                                             "type": "plain_text",
+                                             "text": "🔍 شوف الـ Pipeline"
+                                           },
+                                           "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                                         }
+                                       ]
+                                     }
+                                   ]
+                                 }
+                               ]
+                             }
+                         env:
+                           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+                           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
-      - name: Notify Slack - Failure
-        if: failure()
-        uses: slackapi/slack-github-action@v1.27.0
-        with:
-          payload: |
-            {
-              "text": "❌ *Pipeline فشل! في مشكلة محتاج تتحل*",
-              "attachments": [{
-                "color": "danger",
-                "fields": [
-                  {"title": "Repo",   "value": "${{ github.repository }}", "short": true},
-                  {"title": "Branch", "value": "${{ github.ref_name }}",   "short": true},
-                  {"title": "By",     "value": "${{ github.actor }}",      "short": true},
-                  {"title": "Link",   "value": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}", "short": false}
-                ]
-              }]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+                         - name: Get failed step name
+                           if: failure()
+                           run: |
+                             echo "FAILED_STEP=في أحد الـ Steps" >> $GITHUB_ENV
+
+                         - name: Notify Slack - Failure
+                           if: failure()
+                           uses: slackapi/slack-github-action@v1.27.0
+                           with:
+                             payload: |
+                               {
+                                 "attachments": [
+                                   {
+                                     "color": "#e01e5a",
+                                     "blocks": [
+                                       {
+                                         "type": "header",
+                                         "text": {
+                                           "type": "plain_text",
+                                           "text": "❌ الـ Pipeline فشل! محتاج تدخل فوري"
+                                         }
+                                       },
+                                       {
+                                         "type": "section",
+                                         "fields": [
+                                           {
+                                             "type": "mrkdwn",
+                                             "text": "*📦 المشروع:*\n${{ github.repository }}"
+                                           },
+                                           {
+                                             "type": "mrkdwn",
+                                             "text": "*🌿 الـ Branch:*\n${{ github.ref_name }}"
+                                           },
+                                           {
+                                             "type": "mrkdwn",
+                                             "text": "*👤 المطور اللي عمل Push:*\n${{ github.actor }}"
+                                           },
+                                           {
+                                             "type": "mrkdwn",
+                                             "text": "*🔖 الـ Commit:*\n`${{ github.sha }}`"
+                                           }
+                                         ]
+                                       },
+                                       {
+                                         "type": "section",
+                                         "text": {
+                                           "type": "mrkdwn",
+                                           "text": "*📝 رسالة الـ Commit اللي سبب المشكلة:*\n${{ github.event.head_commit.message }}"
+                                         }
+                                       },
+                                       {
+                                         "type": "divider"
+                                       },
+                                       {
+                                         "type": "section",
+                                         "text": {
+                                           "type": "mrkdwn",
+                                           "text": "*🔎 إيه المشكلة؟*\nفيه خطأ في الـ Pipeline - اضغط الزرار الجنب تشوف التفاصيل الكاملة والـ Step اللي فشل"
+                                         }
+                                       },
+                                       {
+                                         "type": "section",
+                                         "text": {
+                                           "type": "mrkdwn",
+                                           "text": "*⚠️ الأسباب الشائعة:*\n• الـ Tests فشلت\n• الـ Code Style فيه مشاكل (Pint)\n• الـ Static Analysis لاقى أخطاء (PHPStan)\n• الـ Migrations فشلت\n• الـ Build فشل"
+                                         }
+                                       },
+                                       {
+                                         "type": "actions",
+                                         "elements": [
+                                           {
+                                             "type": "button",
+                                             "style": "danger",
+                                             "text": {
+                                               "type": "plain_text",
+                                               "text": "🚨 شوف الـ Error بالتفصيل"
+                                             },
+                                             "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                                           },
+                                           {
+                                             "type": "button",
+                                             "text": {
+                                               "type": "plain_text",
+                                               "text": "📋 شوف الـ Commit"
+                                             },
+                                             "url": "${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
+                                           }
+                                         ]
+                                       }
+                                     ]
+                                   }
+                                 ]
+                               }
+                           env:
+                             SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+                             SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
