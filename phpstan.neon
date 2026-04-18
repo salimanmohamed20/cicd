@@ -4,8 +4,6 @@ includes:
 parameters:
     paths:
         - app
-
     level: 5
-
-        ignoreErrors:
-            - '#Relation .* is not found in#'
+    ignoreErrors:
+        - '#Relation .* is not found in#'
