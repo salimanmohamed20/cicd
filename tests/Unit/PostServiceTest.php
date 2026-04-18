@@ -17,7 +17,7 @@ class PostServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new PostService();
+        $this->service = new PostService;
     }
 
     // ─── Create Tests ────────────────────────────────
@@ -27,8 +27,8 @@ class PostServiceTest extends TestCase
         $user = User::factory()->create();
 
         $post = $this->service->create([
-            'title'     => 'Test Post Title',
-            'body'      => str_repeat('body ', 20),
+            'title' => 'Test Post Title',
+            'body' => str_repeat('body ', 20),
             'published' => true,
         ], $user);
 
@@ -41,8 +41,8 @@ class PostServiceTest extends TestCase
         $user = User::factory()->create();
 
         $post = $this->service->create([
-            'title'     => 'Draft Post Title',
-            'body'      => str_repeat('body ', 20),
+            'title' => 'Draft Post Title',
+            'body' => str_repeat('body ', 20),
             'published' => false,
         ], $user);
 
@@ -55,8 +55,8 @@ class PostServiceTest extends TestCase
         $user = User::factory()->create();
 
         $post = $this->service->create([
-            'title'     => 'User Post Title',
-            'body'      => str_repeat('body ', 20),
+            'title' => 'User Post Title',
+            'body' => str_repeat('body ', 20),
             'published' => false,
         ], $user);
 

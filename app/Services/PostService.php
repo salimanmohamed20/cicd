@@ -10,9 +10,9 @@ class PostService
     public function create(array $data, User $user): Post
     {
         return $user->posts()->create([
-            'title'        => $data['title'],
-            'body'         => $data['body'],
-            'published'    => $data['published'] ?? false,
+            'title' => $data['title'],
+            'body' => $data['body'],
+            'published' => $data['published'] ?? false,
             'published_at' => ($data['published'] ?? false) ? now() : null,
         ]);
     }
@@ -20,7 +20,7 @@ class PostService
     public function publish(Post $post): Post
     {
         $post->update([
-            'published'    => true,
+            'published' => true,
             'published_at' => now(),
         ]);
 
@@ -35,7 +35,7 @@ class PostService
     public function getReadingTime(Post $post): int
     {
         $wordsPerMinute = 200;
-        $words          = $this->getWordCount($post);
+        $words = $this->getWordCount($post);
 
         return (int) ceil($words / $wordsPerMinute);
     }

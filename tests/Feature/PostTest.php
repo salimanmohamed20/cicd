@@ -68,8 +68,8 @@ class PostTest extends TestCase
 
         $response = $this->actingAs($user)
             ->postJson('/api/posts', [
-                'title'     => 'My First Post Title',
-                'body'      => 'This is the body content of my post, it needs to be at least 20 characters.',
+                'title' => 'My First Post Title',
+                'body' => 'This is the body content of my post, it needs to be at least 20 characters.',
                 'published' => true,
             ]);
 
@@ -80,7 +80,7 @@ class PostTest extends TestCase
             ]);
 
         $this->assertDatabaseHas('posts', [
-            'title'   => 'My First Post Title',
+            'title' => 'My First Post Title',
             'user_id' => $user->id,
         ]);
     }
@@ -92,7 +92,7 @@ class PostTest extends TestCase
         $this->actingAs($user)
             ->postJson('/api/posts', [
                 'title' => 'Hi',  // أقصر من 5 حروف
-                'body'  => str_repeat('content ', 10),
+                'body' => str_repeat('content ', 10),
             ])
             ->assertStatus(422)
             ->assertJsonValidationErrors(['title']);
@@ -102,7 +102,7 @@ class PostTest extends TestCase
     {
         $this->postJson('/api/posts', [
             'title' => 'Test Post',
-            'body'  => 'Content here...',
+            'body' => 'Content here...',
         ])->assertStatus(401);
     }
 
@@ -116,27 +116,27 @@ class PostTest extends TestCase
         $response = $this->actingAs($user)
             ->putJson("/api/posts/{$post->id}", [
                 'title' => 'Updated Title Here',
-                'body'  => str_repeat('updated body content ', 5),
+                'body' => str_repeat('updated body content ', 5),
             ]);
 
         $response->assertStatus(200);
 
         $this->assertDatabaseHas('posts', [
-            'id'    => $post->id,
+            'id' => $post->id,
             'title' => 'Updated Title Here',
         ]);
     }
 
     public function test_user_cannot_update_another_users_post(): void
     {
-        $owner  = User::factory()->create();
+        $owner = User::factory()->create();
         $hacker = User::factory()->create();
-        $post   = Post::factory()->create(['user_id' => $owner->id]);
+        $post = Post::factory()->create(['user_id' => $owner->id]);
 
         $this->actingAs($hacker)
             ->putJson("/api/posts/{$post->id}", [
                 'title' => 'Hacked!',
-                'body'  => str_repeat('hacked content ', 5),
+                'body' => str_repeat('hacked content ', 5),
             ])
             ->assertStatus(403);
     }
@@ -158,9 +158,9 @@ class PostTest extends TestCase
 
     public function test_user_cannot_delete_another_users_post(): void
     {
-        $owner  = User::factory()->create();
+        $owner = User::factory()->create();
         $hacker = User::factory()->create();
-        $post   = Post::factory()->create(['user_id' => $owner->id]);
+        $post = Post::factory()->create(['user_id' => $owner->id]);
 
         $this->actingAs($hacker)
             ->deleteJson("/api/posts/{$post->id}")

@@ -31,7 +31,7 @@ class PostController extends Controller
 
         return response()->json([
             'message' => 'Post created successfully',
-            'post'    => $post->load('user'),
+            'post' => $post->load('user'),
         ], 201);
     }
 
@@ -50,7 +50,7 @@ class PostController extends Controller
 
         return response()->json([
             'message' => 'Post updated successfully',
-            'post'    => $post->fresh('user'),
+            'post' => $post->fresh('user'),
         ]);
     }
 

@@ -15,9 +15,9 @@ class AuthTest extends TestCase
     public function test_user_can_register_with_valid_data(): void
     {
         $response = $this->postJson('/api/register', [
-            'name'                  => 'Ahmed Mohamed',
-            'email'                 => 'ahmed@example.com',
-            'password'              => 'password123',
+            'name' => 'Ahmed Mohamed',
+            'email' => 'ahmed@example.com',
+            'password' => 'password123',
             'password_confirmation' => 'password123',
         ]);
 
@@ -38,9 +38,9 @@ class AuthTest extends TestCase
         User::factory()->create(['email' => 'exists@example.com']);
 
         $response = $this->postJson('/api/register', [
-            'name'                  => 'Another User',
-            'email'                 => 'exists@example.com',
-            'password'              => 'password123',
+            'name' => 'Another User',
+            'email' => 'exists@example.com',
+            'password' => 'password123',
             'password_confirmation' => 'password123',
         ]);
 
@@ -61,12 +61,12 @@ class AuthTest extends TestCase
     public function test_user_can_login_with_correct_credentials(): void
     {
         $user = User::factory()->create([
-            'email'    => 'test@example.com',
+            'email' => 'test@example.com',
             'password' => bcrypt('mypassword'),
         ]);
 
         $response = $this->postJson('/api/login', [
-            'email'    => 'test@example.com',
+            'email' => 'test@example.com',
             'password' => 'mypassword',
         ]);
 
@@ -79,7 +79,7 @@ class AuthTest extends TestCase
         User::factory()->create(['email' => 'test@example.com']);
 
         $response = $this->postJson('/api/login', [
-            'email'    => 'test@example.com',
+            'email' => 'test@example.com',
             'password' => 'wrongpassword',
         ]);
 
@@ -90,7 +90,7 @@ class AuthTest extends TestCase
     public function test_login_fails_with_nonexistent_email(): void
     {
         $response = $this->postJson('/api/login', [
-            'email'    => 'nobody@example.com',
+            'email' => 'nobody@example.com',
             'password' => 'password123',
         ]);
 
@@ -101,7 +101,7 @@ class AuthTest extends TestCase
 
     public function test_authenticated_user_can_logout(): void
     {
-        $user  = User::factory()->create();
+        $user = User::factory()->create();
         $token = $user->createToken('test')->plainTextToken;
 
         $response = $this->withHeader('Authorization', "Bearer $token")
@@ -133,8 +133,8 @@ class AuthTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJson([
-                'id'    => $user->id,
-                'name'  => 'Test User',
+                'id' => $user->id,
+                'name' => 'Test User',
                 'email' => $user->email,
             ]);
     }
