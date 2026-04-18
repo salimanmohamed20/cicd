@@ -1,4 +1,3 @@
-# .github/workflows/ci.yml
 name: Laravel CI
 
 on:
@@ -32,7 +31,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup PHP 8.3
+      - name: Setup PHP 8.4
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
@@ -64,16 +63,16 @@ jobs:
       - name: Prepare .env.testing
         run: |
           cp .env.example .env.testing
-          echo "APP_ENV=testing"        >> .env.testing
-          echo "DB_CONNECTION=mysql"    >> .env.testing
-          echo "DB_HOST=127.0.0.1"      >> .env.testing
-          echo "DB_PORT=3306"           >> .env.testing
+          echo "APP_ENV=testing"          >> .env.testing
+          echo "DB_CONNECTION=mysql"      >> .env.testing
+          echo "DB_HOST=127.0.0.1"        >> .env.testing
+          echo "DB_PORT=3306"             >> .env.testing
           echo "DB_DATABASE=laravel_test" >> .env.testing
-          echo "DB_USERNAME=laravel"    >> .env.testing
-          echo "DB_PASSWORD=secret"     >> .env.testing
-          echo "CACHE_STORE=array"      >> .env.testing
-          echo "SESSION_DRIVER=array"   >> .env.testing
-          echo "QUEUE_CONNECTION=sync"  >> .env.testing
+          echo "DB_USERNAME=laravel"      >> .env.testing
+          echo "DB_PASSWORD=secret"       >> .env.testing
+          echo "CACHE_STORE=array"        >> .env.testing
+          echo "SESSION_DRIVER=array"     >> .env.testing
+          echo "QUEUE_CONNECTION=sync"    >> .env.testing
 
       - name: Generate app key
         run: php artisan key:generate --env=testing
@@ -96,3 +95,46 @@ jobs:
           DB_DATABASE: laravel_test
           DB_USERNAME: laravel
           DB_PASSWORD: secret
+
+      # ─── Slack Notifications ─────────────────────────
+      - name: Notify Slack - Success
+        if: success()
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          payload: |
+            {
+              "text": "✅ *Pipeline نجح!*",
+              "attachments": [{
+                "color": "good",
+                "fields": [
+                  {"title": "Repo",   "value": "${{ github.repository }}", "short": true},
+                  {"title": "Branch", "value": "${{ github.ref_name }}",   "short": true},
+                  {"title": "By",     "value": "${{ github.actor }}",      "short": true},
+                  {"title": "Link",   "value": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}", "short": false}
+                ]
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Notify Slack - Failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1.27.0
+        with:
+          payload: |
+            {
+              "text": "❌ *Pipeline فشل! في مشكلة محتاج تتحل*",
+              "attachments": [{
+                "color": "danger",
+                "fields": [
+                  {"title": "Repo",   "value": "${{ github.repository }}", "short": true},
+                  {"title": "Branch", "value": "${{ github.ref_name }}",   "short": true},
+                  {"title": "By",     "value": "${{ github.actor }}",      "short": true},
+                  {"title": "Link",   "value": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}", "short": false}
+                ]
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

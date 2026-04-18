@@ -5,5 +5,5 @@ parameters:
     paths:
         - app
     level: 5
-    ignoreErrors:
+                 ignoreErrors:
         - '#Relation .* is not found in#'
